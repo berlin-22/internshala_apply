@@ -37,7 +37,23 @@ def send_email(subject, body):
 def build_run_summary_email(summary):
     """Builds a subject + body from the dict returned by bot.run()."""
     applied = [d for d in summary["details"] if d["status"] == "applied"]
+    would_apply = [d for d in summary["details"] if d["status"] == "dry_run_skipped"]
     count = len(applied)
+
+    # Dry run: show what WOULD have been applied to, so a test run is actually informative
+    if summary.get("dry_run"):
+        if not would_apply:
+            return "Internshala Bot [DRY RUN]: no matching listings found", \
+                   "Dry run completed. No listings matched your skill/keyword filters this time."
+
+        subject = f"Internshala Bot [DRY RUN]: would have applied to {len(would_apply)} internship(s)"
+        lines = [f"DRY RUN — nothing was actually submitted. Found {len(would_apply)} matching listing(s):\n"]
+        for d in would_apply:
+            skills = ", ".join(d["matched_skills"]) if d["matched_skills"] else "—"
+            lines.append(f"• {d['title']} @ {d['company']}")
+            lines.append(f"  Matched skills: {skills}")
+            lines.append(f"  Link: {d['url']}\n")
+        return subject, "\n".join(lines)
 
     if count == 0:
         subject = "Internshala Bot: no new applications today"
