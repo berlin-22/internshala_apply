@@ -1,0 +1,55 @@
+name: Internshala Auto-Apply
+
+on:
+  schedule:
+    - cron: "30 3 * * *"   # 3:30 AM UTC = 9:00 AM IST daily
+  workflow_dispatch:        # lets you trigger it manually from the Actions tab too
+    inputs:
+      dry_run:
+        description: "Run without actually submitting applications"
+        required: false
+        default: "false"
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          playwright install --with-deps chromium
+
+      - name: Restore saved login session
+        run: echo "${{ secrets.SESSION_STATE_B64 }}" | base64 -d > session_state.json
+
+      - name: Restore previous applied_log (if it exists from a prior run)
+        uses: actions/download-artifact@v4
+        with:
+          name: applied-log
+          path: .
+        continue-on-error: true   # first-ever run won't have a prior artifact yet
+
+      - name: Run the bot
+        env:
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          NOTIFY_TO_EMAIL: ${{ secrets.NOTIFY_TO_EMAIL }}
+          DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+        run: python bot.py
+
+      - name: Save applied_log for next run
+        uses: actions/upload-artifact@v4
+        with:
+          name: applied-log
+          path: applied_log.csv
+          retention-days: 90
