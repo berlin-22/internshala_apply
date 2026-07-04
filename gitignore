@@ -1,0 +1,13 @@
+# Sensitive / local-only — never commit these
+session_state.json
+.env
+*.pyc
+__pycache__/
+
+# Local logs (Phase 4 will handle committing applied_log.csv back deliberately via the workflow itself)
+# Leave this line commented out once we reach Phase 4:
+# applied_log.csv
+
+# OS/editor noise
+.DS_Store
+.vscode/
