@@ -10,7 +10,7 @@ still works unchanged when you run it on your own laptop.
 import os
 
 # ---- Search filters ----
-KEYWORDS = ["machine learning", "data science", "python", "AI"]   # any of these matching in title/skills counts as a match
+KEYWORDS = ["machine learning", "data science", "python", "artificial intelligence"]   # any of these matching in title/skills counts as a match
 LOCATION = "work-from-home"          # e.g. "delhi-ncr", "bangalore", or "work-from-home"
 MIN_STIPEND = 5000                   # rupees/month, set 0 to disable filter
 CATEGORY_URL = "https://internshala.com/internships/{keyword}-internship/{location}"
@@ -25,6 +25,10 @@ MIN_SKILL_MATCH = 1     # min number of overlapping skills to auto-apply
 
 # ---- Application content ----
 RESUME_PATH = os.getenv("RESUME_PATH", "resume.pdf")   # repo-relative by default; committed alongside the code
+ADDITIONAL_QUESTION_DEFAULT = "Yes"   # default answer picked for any dynamic Yes/No "Additional question(s)" Internshala adds per-listing.
+                                       # IMPORTANT: review this assumption — e.g. if you're not open to full-time conversion,
+                                       # you may want "No" for that specific question. Since questions vary per listing and
+                                       # can't be matched individually in advance, this applies the same answer to all of them.
 COVER_LETTER_TEMPLATE = """Dear Hiring Team,
 
 I am a 3rd-year B.Tech Artificial Intelligence and Data Science student with hands-on
@@ -40,7 +44,8 @@ Best regards,
 
 # ---- Safety / rate limiting ----
 DRY_RUN = os.getenv("DRY_RUN", "false").lower() == "true"   # default False (full auto-submit); set env DRY_RUN=true to test safely
-HEADLESS_MODE = True            # always headless in CI; no display exists on GitHub's runners anyway
+HEADLESS_MODE = os.getenv("HEADLESS_MODE", "true").lower() == "true"   # defaults True (required in CI); set env HEADLESS_MODE=false locally to watch the browser
+DEBUG_PAUSE = os.getenv("DEBUG_PAUSE", "false").lower() == "true"   # if true, pauses on each listing so you can inspect the automated browser's actual DOM directly
 MAX_APPLICATIONS_PER_RUN = int(os.getenv("MAX_APPLICATIONS_PER_RUN", "12"))
 MIN_DELAY_SECONDS = 8
 MAX_DELAY_SECONDS = 22
