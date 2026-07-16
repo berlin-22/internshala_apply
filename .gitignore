@@ -1,8 +1,13 @@
 # Sensitive / local-only — never commit these
 session_state.json
+cookies.txt
+applied_log.csv
 .env
 *.pyc
 __pycache__/
+
+# Dashboard data is generated fresh by the workflow each run — don't commit a stale local copy
+site/dashboard_data.json
 
 # Local logs (Phase 4 will handle committing applied_log.csv back deliberately via the workflow itself)
 # Leave this line commented out once we reach Phase 4:

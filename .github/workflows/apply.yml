@@ -47,6 +47,16 @@ jobs:
           DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
         run: python bot.py
 
+      - name: Generate dashboard data
+        run: python generate_dashboard_data.py
+
+      - name: Deploy dashboard to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./site
+          keep_files: false
+
       - name: Save applied_log for next run
         uses: actions/upload-artifact@v4
         with:
