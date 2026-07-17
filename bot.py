@@ -120,13 +120,20 @@ def handle_additional_questions(page):
     if any of your real answers should be 'No' (e.g. you don't want to
     commit to full-time conversion), edit ADDITIONAL_QUESTION_DEFAULT in
     config.py, or handle that specific question here explicitly.
+
+    SCOPING: clicks are restricted to the container the "Additional
+    question(s)" heading lives in, NOT the whole page — clicking any
+    "Yes" text anywhere on the page risks hitting an unrelated element
+    (a popup, survey, etc.) and closing the application modal early.
     """
     default_answer = getattr(config, "ADDITIONAL_QUESTION_DEFAULT", "Yes")
     try:
-        additional_section = page.get_by_text("Additional question(s)", exact=False)
-        if additional_section.count() == 0:
+        heading = page.get_by_text("Additional question(s)", exact=False)
+        if heading.count() == 0:
             return  # no extra questions on this listing
-        yes_options = page.get_by_text(default_answer, exact=True)
+
+        container = heading.first.locator("xpath=ancestor::*[self::div or self::form or self::section][1]")
+        yes_options = container.get_by_text(default_answer, exact=True)
         count = yes_options.count()
         for i in range(count):
             try:
@@ -295,7 +302,12 @@ def apply_to_internship(page, listing, matched):
             print(f"  ✔ applied: {listing['title']} @ {listing['company']}")
             return "applied"
         else:
-            print(f"  ! could not find Submit button for: {listing['title']}")
+            debug_path = f"debug_no_submit_{int(time.time())}.png"
+            try:
+                page.screenshot(path=debug_path)
+                print(f"  ! could not find Submit button for: {listing['title']} — screenshot saved to {debug_path}")
+            except Exception:
+                print(f"  ! could not find Submit button for: {listing['title']}")
             return "no_submit_button"
     except Exception as e:
         print(f"  ! error during submit: {e}")

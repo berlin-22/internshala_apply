@@ -47,6 +47,15 @@ jobs:
           DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
         run: python bot.py
 
+      - name: Upload debug screenshots (if any failures occurred)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-screenshots
+          path: debug_*.png
+          retention-days: 14
+          if-no-files-found: ignore
+
       - name: Generate dashboard data
         run: python generate_dashboard_data.py
 
